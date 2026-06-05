@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Generator Pro Ver7.3 (Secure-Backup Edition)</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; text-align: center; padding-top: 50px; line-height: 1.6; background-color: #f4f7f9; color: #333; }
+        
+        .main-wrapper { display: flex; justify-content: center; align-items: flex-start; gap: 20px; max-width: 900px; margin: auto; padding: 0 15px; flex-wrap: wrap; }
+        
+        .container { flex: 1 1 450px; max-width: 500px; border: none; padding: 30px; border-radius: 12px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
+        
+        .history-container { display: flex; flex-direction: column; flex: 1 1 280px; max-width: 320px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: left; box-sizing: border-box; }
+        
+        .history-header { border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 12px; }
+        .history-header h4 { margin: 0; color: #007bff; font-size: 1.1rem; }
+        
+        .history-filter { width: 100%; padding: 6px 10px; margin: 8px 0 4px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 0.8rem; box-sizing: border-box; transition: border-color 0.3s ease; }
+        .history-filter:focus { border-color: #007bff; outline: none; box-shadow: 0 0 4px rgba(0,123,255,0.15); }
+
+        #historyList { list-style: none; padding: 0; margin: 10px 0 0 0; max-height: 440px; overflow-y: auto; }
+        #historyList li { background: #f4f7f9; margin-bottom: 8px; padding: 8px 10px; border-radius: 6px; font-size: 0.8rem; color: #555; border-left: 4px solid #6c757d; word-break: break-all; }
+
+        .help-trigger { position: absolute; top: 15px; right: 20px; background: none; border: none; color: #007bff; font-size: 0.9rem; cursor: pointer; padding: 5px 10px; font-weight: bold; transition: color 0.3s; }
+        .help-trigger:hover { color: #0056b3; text-decoration: underline; }
+
+        .access-key-control { position: absolute; top: 15px; left: 20px; display: flex; align-items: center; gap: 5px; z-index: 10; }
+        .btn-access-key { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 2px 5px; border-radius: 4px; transition: background 0.3s; line-height: 1; }
+        .btn-access-key:hover { background: #e2e6ea; }
+        
+        .access-key-box { display: none; background: white; border: 1px solid #ddd; padding: 5px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); align-items: center; gap: 5px; }
+        .access-key-box input { width: 140px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; box-sizing: border-box; }
+        .access-key-box input:focus { border-color: #007bff; outline: none; }
+        
+        .btn-access-clear { background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 0.8rem; cursor: pointer; font-weight: bold; transition: background 0.3s; line-height: 1.2; }
+        .btn-access-clear:hover { background: #bd2130; }
+
+        h3 { margin-bottom: 10px; color: #007bff; padding: 0 40px; }
+        p { font-size: 0.9rem; color: #666; margin-bottom: 25px; }
+        label { font-weight: bold; display: block; text-align: left; margin-left: 10%; font-size: 0.85rem; }
+        input[type="text"], input[type="password"], textarea { width: 80%; padding: 12px; margin: 8px 0 20px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; transition: border-color 0.3s; box-sizing: border-box; }
+        input[type="text"]:focus, input[type="password"]:focus, textarea:focus { border-color: #007bff; outline: none; box-shadow: 0 0 5px rgba(0,123,255,0.2); }
+        .bun2-wrapper { position: relative; width: 80%; margin: 8px auto 20px auto; }
+        .bun2-wrapper input[type="password"], .bun2-wrapper input[type="text"] { width: 100%; margin: 0; }
+        .btn-toggle-eye { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #666; padding: 5px; opacity: 0.7; transition: opacity 0.3s; }
+        .btn-toggle-eye:hover { opacity: 1; }
+        .password-mask { -webkit-text-security: disc; }
+        input[readonly], textarea[readonly] { background-color: #f9f9f9; cursor: pointer; font-family: monospace; word-break: break-all; }
+        
+        textarea#pass { resize: none; height: 54px; min-height: 54px; overflow-y: auto; line-height: 1.4; }
+
+        .slider-group { width: 80%; margin: -10px auto 20px auto; text-align: left; }
+        .slider-label-wrapper { display: flex; justify-content: space-between; font-size: 0.85rem; color: #555; margin-bottom: 5px; }
+        .slider-label-wrapper span { font-weight: bold; }
+        input[type="range"] { width: 100%; margin: 5px 0; cursor: pointer; }
+
+        .options-group { width: 80%; margin: 0 auto 20px auto; text-align: left; display: flex; align-items: center; gap: 8px; }
+        .options-group input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+        .options-group label { display: inline; margin-left: 0; cursor: pointer; user-select: none; }
+
+        .btn-group { margin-top: 10px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        button { padding: 10px 20px; cursor: pointer; border: none; border-radius: 6px; background: #007bff; color: white; font-weight: bold; font-size: 0.9rem; transition: background 0.3s; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #cccccc; cursor: not-allowed; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #bd2130; }
+        .btn-info { background: #17a2b8; }
+        .btn-info:hover { background: #138496; }
+        
+        .feedback-msg { font-weight: bold; margin-top: 15px; display: none; font-size: 0.85rem; text-align: center; }
+        .copy-success { color: #28a745; }
+        .error-msg { color: #dc3545; }
+        .info-msg { color: #007bff; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; max-width: 480px; width: 90%; box-shadow: 0 4px 15px rgba(0,0,0,0.2); text-align: left; display: flex; flex-direction: column; transition: all 0.3s ease; max-height: 90vh; }
+        
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 12px; flex-shrink: 0; }
+        .modal-header h4 { margin: 0; color: #333; }
+        
+        .modal-header-btns { display: flex; gap: 6px; }
+        .btn-sm-header { padding: 4px 10px; font-size: 0.75rem; background-color: #6c757d; border-radius: 4px; }
+        .btn-sm-header:hover { background-color: #5a6268; }
+
+        .memo-label-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-shrink: 0; }
+        .btn-toggle-expand { background: none; border: none; color: #007bff; cursor: pointer; font-size: 0.9rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; transition: background 0.2s; }
+        .btn-toggle-expand:hover { background: #e2e6ea; color: #0056b3; }
+
+        .modal-content textarea { width: 100%; height: 120px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; resize: none; box-sizing: border-box; margin-bottom: 15px; transition: height 0.3s ease; }
+        .modal-content textarea:focus { border-color: #007bff; outline: none; }
+        .modal-content input[type="text"] { width: 100%; margin: 8px 0 15px 0; flex-shrink: 0; }
+        
+        .file-upload-section { margin-bottom: 15px; background: #f8f9fa; padding: 10px; border-radius: 6px; border: 1px dashed #ced4da; flex-shrink: 0; }
+        .file-info-area { font-size: 0.8rem; color: #495057; margin-top: 5px; max-height: 120px; overflow-y: auto; word-break: break-all; }
+        .file-item-row { display: flex; justify-content: space-between; align-items: center; background: white; padding: 4px 8px; margin-bottom: 4px; border-radius: 4px; border: 1px solid #e9ecef; }
+        
+        .file-preview-link { color: #007bff; font-weight: bold; text-decoration: underline; cursor: pointer; background: none; border: none; padding: 0; font-size: 0.8rem; text-align: left; word-break: break-all; }
+        .file-preview-link:hover { color: #0056b3; }
+
+        .btn-delete-file { background: #dc3545; padding: 2px 6px; font-size: 0.75rem; border-radius: 4px; color: white; cursor: pointer; border: none; flex-shrink: 0; margin-left: 10px; }
+        .btn-delete-file:hover { background: #bd2130; }
+
+        .modal-desc { margin-bottom: 12px; font-size: 0.8rem; color: #555; line-height: 1.4; flex-shrink: 0; }
+        .modal-footer-btns { justify-content: flex-end; flex-shrink: 0; }
+
+        .modal-content.expanded { max-width: 95vw; width: 95%; height: 90vh; }
+        .modal-content.expanded textarea#memoArea { flex-grow: 1; height: auto; min-height: 150px; margin-bottom: 15px; }
+
+        .viewer-modal-content { max-width: 96vw; width: 96vw; height: 96vh; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); display: flex; flex-direction: column; text-align: left; }
+        .viewer-body { flex-grow: 1; overflow: auto; background: #f8f9fa; border: 1px solid #ddd; border-radius: 6px; display: flex; justify-content: center; align-items: center; padding: 10px; margin-bottom: 15px; }
+        .viewer-img { max-width: 100%; max-height: 100%; object-fit: contain; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .viewer-pdf { width: 100%; height: 100%; border: none; background: #fff; }
+        .viewer-text { width: 100%; height: 100%; margin: 0; padding: 12px; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; word-break: break-all; background: #fff; overflow-y: auto; box-sizing: border-box; color: #333; line-height: 1.5; }
+        .viewer-unsupported { text-align: center; color: #666; font-size: 0.9rem; padding: 20px; }
+
+        .help-content { max-height: 380px; overflow-y: auto; font-size: 0.85rem; color: #444; line-height: 1.6; padding-right: 5px; }
+        .help-section { margin-bottom: 20px; }
+        .help-section h5 { margin: 12px 0 6px 0; color: #007bff; font-size: 0.9rem; border-left: 3px solid #007bff; padding-left: 6px; }
+        .help-section ul { padding-left: 18px; margin: 5px 0; }
+        .help-section li { margin-bottom: 8px; }
+        .help-sub-title { font-weight: bold; color: #333; margin-top: 8px; display: block; }
+        .help-box { background-color: #f0f4f8; padding: 12px; border-radius: 6px; margin-top: 8px; border-left: 3px solid #6c757d; }
+
+        .alert-text { color: #dc3545; font-weight: bold; }
+
+        .db-reset-section { margin-top: 20px; padding-top: 15px; border-top: 1px dashed #e0e0e0; text-align: center; }
+        .db-reset-link { color: #999; font-size: 0.78rem; cursor: pointer; background: none; border: none; text-decoration: underline; padding: 4px 8px; transition: color 0.3s; }
+        .db-reset-link:hover { color: #dc3545; }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+    <div class="container">
+        <div class="access-key-control">
+            <button type="button" class="btn-access-key" id="btnToggleAccessKey" title="アクセスキー設定 (第3のキー)">🔑</button>
+            <div id="accessKeyBox" class="access-key-box">
+                <input type="password" id="accessKeyInput" placeholder="アクセスキー (任意)" autocomplete="new-password">
+                <button type="button" class="btn-access-clear" id="btnClearAccessKey" title="アクセスキーを消去">×</button>
+            </div>
+        </div>
+
+        <button type="button" class="help-trigger" id="btnOpenHelp">使い方 / 安全性 🛈</button>
+
+        <h3>パスワード生成ツール Ver7.3</h3>
+        <p>「文１」「文２」から安全なパスワードを自動生成します。</p>
+
+        <form id="pwForm" onsubmit="return false;">
+            <label>文１</label>
+            <input type="text" id="bun1" placeholder="フレーズ１を入力..." autocomplete="off">
+            
+            <label>文２</label>
+            <div class="bun2-wrapper">
+                <input type="text" id="bun2" class="password-mask" placeholder="フレーズ２を入力..." autocomplete="off">
+                <button type="button" id="btnToggleBun2" class="btn-toggle-eye" aria-label="押している間だけ表示" title="押している間だけ表示">👁️</button>
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-label-wrapper">
+                    <label style="margin-left: 0; display: inline;">パスワードの長さ</label>
+                    <div><span id="pwLengthVal">32</span> 文字</div>
+                </div>
+                <input type="range" id="pwLength" min="16" max="256" step="16" value="32">
+            </div>
+
+            <div class="options-group">
+                <input type="checkbox" id="useSymbols" checked>
+                <label for="useSymbols">パスワードに記号を含める</label>
+            </div>
+
+            <label>生成されたパスワード</label>
+            <textarea id="pass" readonly placeholder="自動生成されます"></textarea>
+
+            <div class="btn-group">
+                <button type="button" id="btnCopy">OK (コピー)</button>
+                <button type="button" class="btn-info" id="btnMemo" disabled>メモ</button>
+                <button type="button" class="btn-danger" id="btnClear">クリア</button>
+            </div>
+        </form>
+        <p id="successMsg" class="feedback-msg copy-success">✓ クリップボードにコピーしました（60秒後に自動消去）</p>
+        <p id="errorMsg" class="feedback-msg error-msg"></p>
+        <p id="infoMsg" class="feedback-msg info-msg"></p>
+    </div>
+
+    <div class="history-container">
+        <div class="history-header">
+            <h4>メモ作成履歴</h4>
+            <input type="text" id="historyFilter" class="history-filter" placeholder="履歴を検索..." autocomplete="off">
+        </div>
+        
+        <ul id="historyList">
+        </ul>
+        
+        <p style="font-size: 0.8rem; color: #666; margin: 15px 0 0 0; line-height: 1.4; border-top: 1px dashed #ddd; padding-top: 10px;">
+            ※メモ保存時に入力した「履歴名」の一覧です。クリックしてもパスワード等は復元されません（備忘録用）。
+        </p>
+    </div>
+</div>
+
+<div id="memoModal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="パスワード紐付けメモ">
+    <div id="memoModalContent" class="modal-content">
+        <div class="modal-header">
+            <h4>パスワード紐付けメモ</h4>
+            <div class="modal-header-btns">
+                <button type="button" class="btn-sm-header" id="btnExportMemo">書き出し</button>
+                <button type="button" class="btn-sm-header" id="btnTriggerImport">読み込み</button>
+                <input type="file" id="importFile" accept=".txt" style="display: none;">
+            </div>
+        </div>
+
+        <p class="modal-desc">
+            メモ本文と添付ファイルは現在のパスワードを鍵として暗号化され、安全にローカル（IndexedDB）へ保存されます。
+        </p>
+
+        <label for="historyName" style="margin-left: 0; font-size: 0.85rem;">履歴名 (一覧表示用 / 任意):</label>
+        <input type="text" id="historyName" placeholder="例: ○○銀行アカウント用" autocomplete="off">
+        
+        <div class="memo-label-container">
+            <label for="memoArea" style="margin-left: 0; font-size: 0.85rem; display: inline-block; margin-bottom: 0;">メモ本文:</label>
+            <button type="button" class="btn-toggle-expand" id="btnToggleExpand" title="表示エリアを拡大/縮小">⛶ 拡大</button>
+        </div>
+        <textarea id="memoArea" placeholder="サイト名やアカウント名など、暗号化して保護したい内容を入力してください..."></textarea>
+        
+        <div class="file-upload-section">
+            <label for="memoFile" style="margin-left: 0; font-size: 0.85rem; display: inline-block;">ファイルの添付 (複数可 / 各最大10MB):</label>
+            <input type="file" id="memoFile" multiple style="font-size: 0.8rem; width: 100%;">
+            <div id="fileInfoArea" class="file-info-area"></div>
+        </div>
+
+        <div class="btn-group modal-footer-btns">
+            <button type="button" class="btn-secondary" id="btnCloseMemo">キャンセル</button>
+            <button type="button" id="btnSaveMemo">保存</button>
+        </div>
+    </div>
+</div>
+
+<div id="viewerModal" class="modal-overlay" style="z-index: 1100;" role="dialog" aria-modal="true" aria-label="ファイルプレビュー">
+    <div class="viewer-modal-content">
+        <div class="modal-header">
+            <h4 id="viewerTitle" style="word-break: break-all; font-size: 1rem; padding-right:10px;">ファイルプレビュー</h4>
+            <div class="modal-header-btns">
+                <button type="button" id="btnViewerDownload" style="padding: 4px 12px; font-size: 0.75rem;">📥 ダウンロード</button>
+            </div>
+        </div>
+        <div class="viewer-body" id="viewerBody">
+        </div>
+        <div class="btn-group" style="justify-content: flex-end; margin-top: 0; flex-shrink: 0;">
+            <button type="button" class="btn-secondary" id="btnCloseViewer" style="padding: 8px 16px;">閉じる</button>
+        </div>
+    </div>
+</div>
+
+<div id="helpModal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="使い方と安全性について">
+    <div class="modal-content" style="max-width: 540px;">
+        <h4>このツールの使い方と安全性について</h4>
+        <div class="help-content">
+            
+            <div class="help-section">
+                <h5>1. 基本的な使い方</h5>
+                <ul>
+                    <li><strong>パスワードの生成：</strong> 「文１」「文２」に秘密のフレーズを入力すると、強力なパスワードが自動計算されます。スライダーで16〜256文字に調節でき、チェックを外せば記号なしの生成も可能です。</li>
+                    <li><strong>アクセスキー（🔑）：</strong> 同じフレーズからでも「別のパスワード」を生成できる第3の隠しキーです（任意入力・空欄も可）。セキュリティのため値は保存されず、毎回入力が必要です。一度でも入力すると次回以降は入力欄が自動表示されます。【×】でリセットできます。</li>
+                    <li><strong>OK（コピー）と手動クリア：</strong> ボタンを押すとコピーされます。安全のため、使用後は<strong>「クリア」ボタンを押して終了</strong>してください。（※タブを閉じる際の自動消去はブラウザの仕様により失敗する場合があります）</li>
+                    <li><strong>60秒自動消去：</strong> 生成から60秒後に画面が完全クリアされます。その際クリップボードの消去も試みますが、別タブを開いている等の場合はブラウザの制約で残ることがあります。※メモ画面の展開中はタイマーが一時停止します。</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h5>2. パスワードの生成強度（安全性）</h5>
+                <ul>
+                    <li><strong>最高峰のハッシュ技術：</strong> 入力された文は、銀行や暗号資産でも使われる国家標準の暗号化技術<strong>「SHA-256」</strong>を組み合わせて複雑に計算されます。</li>
+                    <li><strong>均等なランダム性（Rejection Sampling）：</strong> 暗号学的な偏り（剰余バイアス）を排除するアルゴリズムを搭載し、すべての文字が数学的に均等な確率で出現するよう設計されています。</li>
+                    <li><strong>推測不可能な仕組み：</strong> 入力した言葉がそのままパスワードになるのではなく、プログラム内部の特殊な文字列（ソルト）と混ざり合い、1文字の違いでも全く異なるランダムなパスワードが出力されるため、悪意ある第三者による推測は不可能です。</li>
+                    <li><strong>サーバーへの送信はゼロ：</strong> すべての計算はお使いのパソコン内（ブラウザ）で完結しており、インターネットを通じて外部にデータが送信されることは絶対にありません。</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h5>3. メモ保存と複数ファイル大容量化の仕組み</h5>
+
+                <span class="help-sub-title">① 履歴一覧機能について</span>
+                <p style="margin: 4px 0 12px 0; padding-left: 8px;">メモ保存時に入力できる「履歴名」は、あなたが何のパスワードを作ったか忘れないための備忘録としてのみ保存されます。履歴一覧を見たりクリックしても、パスワードや入力フレーズが復元・生成されることはなく安全です。</p>
+
+                <span class="help-sub-title">② 複数ファイル保存対応（IndexedDBの採用）</span>
+                <p style="margin: 4px 0 12px 0; padding-left: 8px;">Ver7.0からは大容量データベース<strong>「IndexedDB」</strong>をフルに活かし、**複数のファイルを同時に添付・管理**できるようになりました。画像、PDF、設定ファイルなどを一つのメモに紐づけてまとめて管理できます。</p>
+                
+                <span class="help-sub-title">③ データはどのように保存されているか（中身の安全性）</span>
+                <p style="margin: 4px 0 4px 0; padding-left: 8px;">保存されるデータは二重に保護されています。</p>
+                <ul style="margin-top: 4px;">
+                    <li><strong>キー（データの名前）の匿名化：</strong> パスワードそのものを名前（キー）にして保存すると危険なため、フレーズに対して秘密のソルトを鍵とした<strong>HMAC-SHA-256</strong>を二重に適用した一意のハッシュ値をキーにしています。ソルトを知らない第三者がキーから元のフレーズを逆算することは不可能です。</li>
+                    <li><strong>値（メモ本文＋全添付ファイル）の強力な暗号化（PBKDF2 + AES-GCM）：</strong> メモおよび全ての添付ファイルは、生成されたパスワードをもとに<strong>「PBKDF2」</strong>という暗号鍵導出関数で30万回の計算を経て強化された鍵を作り、米国の政府標準暗号でもある <strong>AES-GCM（256bit）</strong> という方式でまるごと一括暗号化されてから保存されます。</li>
+                </ul>
+
+                <div class="help-box">
+                    <strong>【データの書き出し・読み込み機能】</strong><br>
+                    モーダル上部の「書き出し」ボタンから、メモと**すべての添付ファイルを含んだデータ**を強力な暗号化状態のまま1つのテキストファイル（.txt）としてダウンロードします。そのため、ファイルを受け渡したりバックアップしたりしても、正しい「文１」「文２」の組み合わせが揃わなければ、世界の誰も中身（テキストおよびすべての添付ファイル）を読み出すことはできません。
+                </div>
+
+                <div class="help-box" style="border-left-color: #dc3545; margin-top: 10px;">
+                    <strong>【ファイルサイズの制限事項】</strong><br>
+                    ブラウザのメモリ保護のため、以下の制限があります。<br>
+                    ・ 1ファイルあたりの添付上限：<strong>10MB</strong><br>
+                    ・ 1メモあたりの添付ファイル合計上限：<strong>30MB</strong><br>
+                    ・ メモインポートファイルの上限：<strong>50MB</strong>
+                </div>
+                
+                <p style="margin-top: 12px;"><span class="alert-text">--注意：</span>データはお使いのブラウザ内にのみ保存されるため、ブラウザの「Cookieやサイトデータ・キャッシュ」を削除するとデータも一緒に消去されます。定期的な一括バックアップを推奨します。</p>
+            </div>
+
+            <div class="help-section" style="border-top: 1px dashed #ccc; padding-top: 15px; margin-top: 15px;">
+                <h5>4. 【NEW】バックアップの二重暗号化について</h5>
+                <p style="margin: 4px 0; padding-left: 8px;">
+                    Ver7.3より、一括バックアップ（書き出し）の実行時に**専用の「バックアップパスワード」**を設定・入力を求めるセキュリティ強化が行われました。
+                </p>
+                <ul>
+                    <li><strong>ファイル自体の暗号化：</strong> 生成されるバックアップファイル（.json）は、設定したパスワードをベースに全体の構造が完全に暗号化（AES-GCM）されます。そのため、万が一ファイルが第三者に盗取されても、パスワードが一致しない限り履歴名や設定などのメタデータすら一切解読できません。</li>
+                    <li><strong>リストア（復元）時のパスワード認証：</strong> バックアップから復元する際、最初に設定したバックアップパスワードの入力が求められます。パスワードが正しく認証された場合のみ、データの上書き確認および展開処理へと進む安全設計です。</li>
+                    <li><strong>バックアップファイルのサイズ制限：</strong> ブラウザのメモリ保護のため、バックアップファイルの読み込み上限は<strong>1GB</strong>です。また、書き出し時にデータ量が1GBを超える場合は警告が表示されます。</li>
+                </ul>
+            </div>
+
+            <div class="db-reset-section">
+                <button type="button" class="db-reset-link" id="btnResetAllData">全データを消去（データベースリセット）</button>
+            </div>
+        </div>
+        <div class="btn-group" style="justify-content: flex-end; margin-top: 15px; border-top: 1px dashed #ddd; padding-top: 12px; gap: 8px;">
+            <button type="button" class="btn-info" id="btnAppBackup" style="font-size: 0.8rem; padding: 8px 14px;">🗂️ 全データ書き出し (Backup)</button>
+            <button type="button" class="btn-secondary" id="btnTriggerAppRestore" style="font-size: 0.8rem; padding: 8px 14px; background-color: #28a745;">📂 全データ読み込み (Restore)</button>
+            <input type="file" id="appRestoreFile" accept=".json" style="display: none;">
+            <button type="button" id="btnCloseHelp" style="font-size: 0.8rem; padding: 8px 14px; background-color: #333;">閉じる</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const CONFIG = {
+    ACC_CODE: "cD0KGXRgPzHw6q$&",
+    PWSSSTR: ":A@q*/+-az@i=U%!(Z;&",
+    SOLTSTR: "K0)&gQ;lMXh*0(A!J=%S",
+    CHARS_WITH_SYMBOLS: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&()=-+*/@",
+    CHARS_WITHOUT_SYMBOLS: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+    STORAGE_PREFIX: "pw_memo_v6_",
+    HISTORY_STORAGE_KEY: "pw_history_list_v5",
+    ACCESS_KEY_STORAGE_KEY: "pw_access_key_raw_v5",
+    PW_LENGTH_STORAGE_KEY: "pw_length_setting_v7",
+    DB_NAME: "PwGenProDB",
+    DB_VERSION: 1,
+    STORE_NAME: "memos",
+    MAX_FILE_SIZE: 10 * 1024 * 1024,
+    AUTO_CLEAR_TIMEOUT: 60 * 1000, // 60秒
+    TYPING_INTERVAL: 400 // 【修正: 追加】入力確定までの待機時間(ms)
+};
+
+let currentRawAccessKey = "";
+let attachedFilesList = [];
+let activeViewerBlobUrl = null;
+let _dbInstance = null;
+
+let autoClearTimerId = null;
+let passwordGeneratedTimestamp = 0;
+let isMemoModalOpen = false;
+
+// 【修正: 追加】Debounce処理用のタイマー変数
+let typingTimer = null;
+
+function initDB() {
+    if (_dbInstance) return Promise.resolve(_dbInstance);
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(CONFIG.DB_NAME, CONFIG.DB_VERSION);
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(CONFIG.STORE_NAME)) {
+                db.createObjectStore(CONFIG.STORE_NAME);
+            }
+        };
+        request.onsuccess = (e) => {
+            _dbInstance = e.target.result;
+            _dbInstance.onclose = () => { _dbInstance = null; };
+            _dbInstance.onversionchange = () => { _dbInstance.close(); _dbInstance = null; };
+            resolve(_dbInstance);
+        };
+        request.onerror = (e) => reject(e.target.error);
+    });
+}
+
+async function getDBItem(key) {
+    const db = await initDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(CONFIG.STORE_NAME, "readonly");
+        const store = transaction.objectStore(CONFIG.STORE_NAME);
+        const request = store.get(key);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function setDBItem(key, value) {
+    const db = await initDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(CONFIG.STORE_NAME, "readwrite");
+        const store = transaction.objectStore(CONFIG.STORE_NAME);
+        const request = store.put(value, key);
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+    });
+}
+
+async function deleteDBItem(key) {
+    const db = await initDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(CONFIG.STORE_NAME, "readwrite");
+        const store = transaction.objectStore(CONFIG.STORE_NAME);
+        const request = store.delete(key);
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+    });
+}
+
+async function getAllDBItems() {
+    const db = await initDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(CONFIG.STORE_NAME, "readonly");
+        const store = transaction.objectStore(CONFIG.STORE_NAME);
+        const request = store.openCursor();
+        const results = {};
+        request.onsuccess = (e) => {
+            const cursor = e.target.result;
+            if (cursor) {
+                results[cursor.key] = cursor.value;
+                cursor.continue();
+            } else {
+                resolve(results);
+            }
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function clearAllDBItems() {
+    const db = await initDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(CONFIG.STORE_NAME, "readwrite");
+        const store = transaction.objectStore(CONFIG.STORE_NAME);
+        const request = store.clear();
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+    });
+}
+
+function showUIError(message) {
+    const errorMsg = document.getElementById('errorMsg');
+    errorMsg.textContent = message;
+    errorMsg.style.display = 'block';
+    setTimeout(() => errorMsg.style.display = 'none', 5000);
+}
+
+function showUIInfo(message) {
+    const infoMsg = document.getElementById('infoMsg');
+    infoMsg.textContent = message;
+    infoMsg.style.display = 'block';
+    setTimeout(() => infoMsg.style.display = 'none', 5000);
+}
+
+function getHistoryList() {
+    try {
+        const data = localStorage.getItem(CONFIG.HISTORY_STORAGE_KEY);
+        if (!data) return {};
+        const parsed = JSON.parse(data);
+        return (typeof parsed === 'object' && parsed !== null) ? parsed : {};
+    } catch (e) {
+        console.warn("履歴データの読み込みに失敗しました。初期化します:", e.message);
+        return {};
+    }
+}
+
+function saveHistoryList(list) {
+    localStorage.setItem(CONFIG.HISTORY_STORAGE_KEY, JSON.stringify(list));
+    renderHistoryList();
+}
+
+function renderHistoryList() {
+    const list = getHistoryList();
+    const ul = document.getElementById('historyList');
+    ul.innerHTML = "";
+    
+    const entries = Object.entries(list);
+    if (entries.length === 0) {
+        ul.innerHTML = '<li style="background:none; border:none; color:#888; justify-content:center;">履歴はありません</li>';
+        return;
+    }
+
+    entries.sort((a, b) => a[1].localeCompare(b[1], 'ja', { numeric: true, sensitivity: 'base' }));
+
+    const filterInput = document.getElementById('historyFilter');
+    const filterText = filterInput ? filterInput.value.trim().toLowerCase() : "";
+    let matchCount = 0;
+
+    entries.forEach(([key, name]) => {
+        if (filterText && !name.toLowerCase().includes(filterText)) return;
+        matchCount++;
+        const li = document.createElement('li');
+        li.textContent = name;
+        ul.appendChild(li);
+    });
+
+    if (matchCount === 0 && filterText) {
+        ul.innerHTML = '<li style="background:none; border:none; color:#888; justify-content:center;">一致する履歴はありません</li>';
+    }
+}
+
+async function computeSHA256(message) {
+    const msgUint8 = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function computeSHA256Buffer(message) {
+    const msgUint8 = new TextEncoder().encode(message);
+    return await crypto.subtle.digest('SHA-256', msgUint8);
+}
+
+async function computeHMACSHA256(key, message) {
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(key);
+    const msgData = encoder.encode(message);
+    const cryptoKey = await crypto.subtle.importKey(
+        "raw", keyData, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+    );
+    const signature = await crypto.subtle.sign("HMAC", cryptoKey, msgData);
+    const hashArray = Array.from(new Uint8Array(signature));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// 【修正: 追加】パスワード生成ベースシード用のストレッチング関数（PBKDF2）
+async function stretchSeed(password, salt, iterations) {
+    const enc = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey(
+        "raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]
+    );
+    const derivedBits = await crypto.subtle.deriveBits(
+        { name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" },
+        keyMaterial,
+        256
+    );
+    return new Uint8Array(derivedBits);
+}
+
+async function encryptText(text, password) {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const pwBytes = new TextEncoder().encode(password);
+    
+    const keyMaterial = await crypto.subtle.importKey("raw", pwBytes, { name: "PBKDF2" }, false, ["deriveKey"]);
+    const key = await crypto.subtle.deriveKey(
+        { name: "PBKDF2", salt: salt, iterations: 300000, hash: "SHA-256" },
+        keyMaterial,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt"]
+    );
+
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const encodedText = new TextEncoder().encode(text);
+    const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, encodedText);
+
+    const combined = new Uint8Array(salt.length + iv.length + ciphertext.byteLength);
+    combined.set(salt, 0);
+    combined.set(iv, salt.length);
+    combined.set(new Uint8Array(ciphertext), salt.length + iv.length);
+    
+    return await arrayBufferToBase64Safe(combined);
+}
+
+async function decryptText(encryptedBase64, password) {
+    try {
+        const combined = new Uint8Array(atob(encryptedBase64).split("").map(c => c.charCodeAt(0)));
+        const salt = combined.slice(0, 16);
+        const iv = combined.slice(16, 28);
+        const ciphertext = combined.slice(28);
+
+        const pwBytes = new TextEncoder().encode(password);
+        const keyMaterial = await crypto.subtle.importKey("raw", pwBytes, { name: "PBKDF2" }, false, ["deriveKey"]);
+        const key = await crypto.subtle.deriveKey(
+            { name: "PBKDF2", salt: salt, iterations: 300000, hash: "SHA-256" },
+            keyMaterial,
+            { name: "AES-GCM", length: 256 },
+            false,
+            ["decrypt"]
+        );
+
+        const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, ciphertext);
+        return new TextDecoder().decode(decrypted);
+    } catch (e) {
+        console.error("復号失敗:", e);
+        return ""; 
+    }
+}
+
+async function arrayBufferToBase64Safe(buffer) {
+    return new Promise((resolve, reject) => {
+        const blob = new Blob([buffer]);
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+}
+
+function base64ToArrayBuffer(base64) {
+    const binary = atob(base64);
+    const len = binary.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes.buffer;
+}
+
+// 【修正: 一部変更】引数をバッファ（Hex文字列）に対応
+async function generateDeterministicPasswordExtended(basePhraseOrHex, pool, length) {
+    let result = "";
+    const poolLength = pool.length;
+    
+    let currentHashBuffer;
+    // PBKDF2で生成したHex文字列が渡された場合は、直接バッファに変換して開始
+    if (/^[0-9a-fA-F]+$/.test(basePhraseOrHex) && basePhraseOrHex.length === 64) {
+        currentHashBuffer = new Uint8Array(basePhraseOrHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16))).buffer;
+    } else {
+        currentHashBuffer = await computeSHA256Buffer(basePhraseOrHex);
+    }
+
+    let hashArray = new Uint8Array(currentHashBuffer);
+    let hashIndex = 0;
+    const limit = 256 - (256 % poolLength);
+    
+    while (result.length < length) {
+        if (hashIndex >= hashArray.length) {
+            currentHashBuffer = await crypto.subtle.digest('SHA-256', currentHashBuffer);
+            hashArray = new Uint8Array(currentHashBuffer);
+            hashIndex = 0;
+        }
+        let val = hashArray[hashIndex++];
+        if (val < limit) {
+            result += pool[val % poolLength];
+        }
+    }
+    return result;
+}
+
+function adjustTextareaHeight(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.max(54, el.scrollHeight + 2) + 'px';
+}
+
+function startAutoClearTimer(delay = CONFIG.AUTO_CLEAR_TIMEOUT) {
+    stopAutoClearTimer();
+    if (delay === CONFIG.AUTO_CLEAR_TIMEOUT) {
+        passwordGeneratedTimestamp = Date.now();
+    }
+    autoClearTimerId = setTimeout(() => {
+        if (isMemoModalOpen) return;
+        executeClearRoutine();
+        showUIInfo("⏳ セキュリティ保護のため、60秒経過したパスワードを自動消去しました。");
+    }, delay);
+}
+
+function stopAutoClearTimer() {
+    if (autoClearTimerId) {
+        clearTimeout(autoClearTimerId);
+        autoClearTimerId = null;
+    }
+}
+
+async function executeClearRoutine() {
+    const passField = document.getElementById('pass');
+    document.getElementById('bun1').value = "";
+    document.getElementById('bun2').value = "";
+    passField.value = "";
+    passField.style.height = '54px';
+    document.getElementById('useSymbols').checked = true;
+    const savedLength = localStorage.getItem(CONFIG.PW_LENGTH_STORAGE_KEY) || "32";
+    document.getElementById('pwLength').value = savedLength;
+    document.getElementById('pwLengthVal').textContent = savedLength;
+    document.getElementById('btnMemo').disabled = true;
+
+    // 【修正: 重要度 中】メモリ上に残っている添付ファイルデータを確実に破棄
+    if (typeof clearAttachedFiles === 'function') {
+        clearAttachedFiles();
+    }
+
+    stopAutoClearTimer();
+    passwordGeneratedTimestamp = 0;
+    clearTimeout(typingTimer);
+
+    try {
+        await navigator.clipboard.writeText("");
+    } catch (e) {
+        console.warn("クリップボード自動クリア: ブラウザにより制限されました");
+    }
+}
+
+// 【修正: 追加】入力ごとに毎回PBKDF2を走らせないためのDebounce用関数
+function handleInputDebounced() {
+    const passField = document.getElementById('pass');
+    const b1 = document.getElementById('bun1').value;
+    const b2 = document.getElementById('bun2').value;
+    const memoBtn = document.getElementById('btnMemo');
+    
+    // 入力値が片方でも空になれば即時クリア
+    if (!b1 || !b2) {
+        passField.value = "";
+        passField.style.height = '54px';
+        memoBtn.disabled = true;
+        stopAutoClearTimer();
+        passwordGeneratedTimestamp = 0;
+        clearTimeout(typingTimer);
+        return;
+    }
+
+    // 計算に時間がかかるため、UIにフィードバックを表示
+    passField.value = "⏳ 計算中...";
+    memoBtn.disabled = true;
+
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(async () => {
+        await updatePassword();
+    }, CONFIG.TYPING_INTERVAL);
+}
+
+async function updatePassword() {
+    const b1 = document.getElementById('bun1').value;
+    const b2 = document.getElementById('bun2').value;
+    const useSymbols = document.getElementById('useSymbols').checked;
+    const length = parseInt(document.getElementById('pwLength').value, 10);
+    localStorage.setItem(CONFIG.PW_LENGTH_STORAGE_KEY, length);
+    const passField = document.getElementById('pass');
+    const memoBtn = document.getElementById('btnMemo');
+
+    document.getElementById('pwLengthVal').textContent = length;
+
+    if (!b1 || !b2) return;
+
+    try {
+        let accessCodeModifier = "";
+        if (currentRawAccessKey) {
+            accessCodeModifier = await computeSHA256(currentRawAccessKey + CONFIG.SOLTSTR);
+        }
+
+        // 【修正: 重要度 高】PBKDF2による重いストレッチング処理の実行
+        const phrasePassword = b1 + CONFIG.PWSSSTR + b2;
+        const phraseSalt = CONFIG.ACC_CODE + CONFIG.SOLTSTR + accessCodeModifier;
+        
+        // 5万回の反復計算でシードを生成し、総当たり攻撃を防ぐ
+        const stretchedSeedBuffer = await stretchSeed(phrasePassword, phraseSalt, 50000);
+        const stretchedSeedHex = Array.from(stretchedSeedBuffer).map(b => b.toString(16).padStart(2, '0')).join('');
+
+        const charPool = useSymbols ? CONFIG.CHARS_WITH_SYMBOLS : CONFIG.CHARS_WITHOUT_SYMBOLS;
+        const generatedPassword = await generateDeterministicPasswordExtended(stretchedSeedHex, charPool, length);
+
+        passField.value = generatedPassword;
+        memoBtn.disabled = false;
+        
+        adjustTextareaHeight(passField);
+        startAutoClearTimer();
+    } catch (e) {
+        console.error(e);
+        showUIError("パスワードの生成に失敗しました。");
+        passField.value = "";
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    currentRawAccessKey = "";
+    if (localStorage.getItem(CONFIG.ACCESS_KEY_STORAGE_KEY) === "1") {
+        document.getElementById('accessKeyBox').style.display = 'flex';
+    }
+
+    const savedLength = localStorage.getItem(CONFIG.PW_LENGTH_STORAGE_KEY) || "32";
+    document.getElementById('pwLength').value = savedLength;
+    document.getElementById('pwLengthVal').textContent = savedLength;
+
+    // 【修正】updatePassword から handleInputDebounced に変更
+    document.getElementById('bun1').addEventListener('input', handleInputDebounced);
+    document.getElementById('bun2').addEventListener('input', handleInputDebounced);
+    document.getElementById('useSymbols').addEventListener('change', handleInputDebounced);
+    
+    // スライダーを動かした時に、文字数の表示だけは即座に反映させる
+    document.getElementById('pwLength').addEventListener('input', (e) => {
+        document.getElementById('pwLengthVal').textContent = e.target.value;
+        handleInputDebounced();
+    });
+    
+    const bun2Input = document.getElementById('bun2');
+    const btnToggleBun2 = document.getElementById('btnToggleBun2');
+    const showBun2 = () => { bun2Input.classList.remove("password-mask"); };
+    const hideBun2 = () => { bun2Input.classList.add("password-mask"); };
+    
+    btnToggleBun2.addEventListener('mousedown', showBun2);
+    btnToggleBun2.addEventListener('mouseup', hideBun2);
+    btnToggleBun2.addEventListener('mouseleave', hideBun2);
+    btnToggleBun2.addEventListener('touchstart', showBun2, { passive: true });
+    btnToggleBun2.addEventListener('touchend', hideBun2);
+    btnToggleBun2.addEventListener('touchcancel', hideBun2);
+
+    document.getElementById('pass').addEventListener('click', function() { this.select(); });
+
+    const accessInput = document.getElementById('accessKeyInput');
+
+    accessInput.addEventListener('input', (e) => {
+        currentRawAccessKey = e.target.value;
+        localStorage.setItem(CONFIG.ACCESS_KEY_STORAGE_KEY, "1");
+        handleInputDebounced(); // 【修正】
+    });
+
+    document.getElementById('btnToggleAccessKey').addEventListener('click', () => {
+        const box = document.getElementById('accessKeyBox');
+        if (box.style.display === 'flex') {
+            box.style.display = 'none';
+        } else {
+            box.style.display = 'flex';
+            accessInput.focus();
+        }
+    });
+
+    document.getElementById('btnClearAccessKey').addEventListener('click', () => {
+        accessInput.value = "";
+        currentRawAccessKey = "";
+        localStorage.removeItem(CONFIG.ACCESS_KEY_STORAGE_KEY);
+        handleInputDebounced(); // 【修正】
+        document.getElementById('accessKeyBox').style.display = 'none';
+    });
+
+    document.addEventListener('click', (e) => {
+        const container = document.querySelector('.access-key-control');
+        const box = document.getElementById('accessKeyBox');
+        if (container && !container.contains(e.target)) {
+            box.style.display = 'none';
+        }
+    });
+
+    document.getElementById('memoFile').addEventListener('change', handleFileSelect);
+
+    document.getElementById('btnCopy').addEventListener('click', handleCopy);
+    document.getElementById('btnClear').addEventListener('click', handleClear);
+    document.getElementById('btnMemo').addEventListener('click', handleOpenMemo);
+    
+    document.getElementById('btnCloseMemo').addEventListener('click', handleCloseMemo);
+    document.getElementById('btnSaveMemo').addEventListener('click', handleSaveMemo);
+    document.getElementById('btnExportMemo').addEventListener('click', handleExportMemo);
+    document.getElementById('btnTriggerImport').addEventListener('click', () => {
+        document.getElementById('importFile').click();
+    });
+    document.getElementById('importFile').addEventListener('change', handleImportMemo);
+
+    document.getElementById('btnOpenHelp').addEventListener('click', handleOpenHelp);
+    document.getElementById('btnCloseHelp').addEventListener('click', handleCloseHelp);
+
+    document.getElementById('btnAppBackup').addEventListener('click', handleAppBackup);
+    document.getElementById('btnTriggerAppRestore').addEventListener('click', () => {
+        document.getElementById('appRestoreFile').click();
+    });
+    document.getElementById('appRestoreFile').addEventListener('change', handleAppRestore);
+
+    document.getElementById('historyFilter').addEventListener('input', renderHistoryList);
+    document.getElementById('btnToggleExpand').addEventListener('click', handleToggleExpand);
+    document.getElementById('btnCloseViewer').addEventListener('click', handleCloseViewer);
+    document.getElementById('btnResetAllData').addEventListener('click', handleResetAllData);
+
+    // Escapeキーでモーダルを閉じる
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        const viewerModal = document.getElementById('viewerModal');
+        if (viewerModal.style.display === 'flex') { handleCloseViewer(); return; }
+        const memoModal = document.getElementById('memoModal');
+        if (memoModal.style.display === 'flex') { handleCloseMemo(); return; }
+        const helpModal = document.getElementById('helpModal');
+        if (helpModal.style.display === 'flex') { handleCloseHelp(); return; }
+    });
+
+    document.getElementById('helpModal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) handleCloseHelp();
+    });
+    document.getElementById('viewerModal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) handleCloseViewer();
+    });
+
+    renderHistoryList();
+});
+
+window.addEventListener('pagehide', () => {
+    try { navigator.clipboard.writeText("").catch(e => {}); } catch(e) {}
+});
+
+async function handleCopy() {
+    const passField = document.getElementById('pass');
+    const pswd = passField.value;
+    if (!pswd || pswd === "⏳ 計算中...") return;
+    try {
+        passField.select();
+        await navigator.clipboard.writeText(pswd);
+        const msg = document.getElementById('successMsg');
+        msg.style.display = 'block';
+        setTimeout(() => msg.style.display = 'none', 2500);
+        startAutoClearTimer();
+    } catch (err) {
+        showUIError("クリップボードへのコピーに失敗しました。");
+    }
+}
+
+async function handleClear() {
+    await executeClearRoutine();
+    showUIInfo("ℹ️ フォームとクリップボードをクリアしました。");
+}
+
+async function getStorageKey() {
+    const b1 = document.getElementById('bun1').value;
+    const b2 = document.getElementById('bun2').value;
+    const memoKeyBase = b1 + "::memo_key_v6::" + b2 + (currentRawAccessKey ? "::" + currentRawAccessKey : "");
+    const innerHmac = await computeHMACSHA256(CONFIG.PWSSSTR, memoKeyBase);
+    const outerHmac = await computeHMACSHA256(CONFIG.SOLTSTR, innerHmac);
+    return CONFIG.STORAGE_PREFIX + outerHmac;
+}
+
+async function handleFileSelect(e) {
+    const files = e.target.files;
+    if (!files.length) return;
+    for (const file of files) {
+        if (file.size > CONFIG.MAX_FILE_SIZE) {
+            alert(`「${file.name}」はサイズが大きすぎます。10MB以下のファイルを選択してください。`);
+            continue;
+        }
+        try {
+            const buffer = await file.arrayBuffer();
+            attachedFilesList.push({ name: file.name, type: file.type, buffer: buffer });
+        } catch (err) {
+            console.error(err);
+            alert(`「${file.name}」の読み込みに失敗しました。`);
+        }
+    }
+    renderFilesList();
+    e.target.value = "";
+}
+
+function renderFilesList() {
+    const area = document.getElementById('fileInfoArea');
+    area.innerHTML = "";
+    if (attachedFilesList.length === 0) return;
+    attachedFilesList.forEach((file, index) => {
+        const row = document.createElement('div');
+        row.className = "file-item-row";
+        const linkBtn = document.createElement('button');
+        linkBtn.type = 'button';
+        linkBtn.className = 'file-preview-link';
+        linkBtn.textContent = `📄 ${file.name}`;
+        linkBtn.addEventListener('click', () => handleOpenViewer(file));
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn-delete-file';
+        btn.textContent = '削除';
+        btn.addEventListener('click', () => removeAttachedFileAt(index));
+        row.appendChild(linkBtn);
+        row.appendChild(btn);
+        area.appendChild(row);
+    });
+}
+
+function removeAttachedFileAt(index) {
+    attachedFilesList.splice(index, 1);
+    renderFilesList();
+}
+
+function clearAttachedFiles() {
+    attachedFilesList = [];
+    document.getElementById('fileInfoArea').innerHTML = "";
+    document.getElementById('memoFile').value = "";
+}
+
+function handleToggleExpand() {
+    const modalContent = document.getElementById('memoModalContent');
+    const expandBtn = document.getElementById('btnToggleExpand');
+    if (modalContent.classList.contains('expanded')) {
+        modalContent.classList.remove('expanded');
+        expandBtn.textContent = '⛶ 拡大';
+    } else {
+        modalContent.classList.add('expanded');
+        expandBtn.textContent = '❐ 縮小';
+    }
+}
+
+function handleOpenViewer(file) {
+    const viewerModal = document.getElementById('viewerModal');
+    const viewerTitle = document.getElementById('viewerTitle');
+    const viewerBody = document.getElementById('viewerBody');
+    const downloadBtn = document.getElementById('btnViewerDownload');
+
+    handleCloseViewer();
+    viewerTitle.textContent = `プレビュー: ${file.name}`;
+    const fileBlob = new Blob([file.buffer], { type: file.type || "application/octet-stream" });
+    activeViewerBlobUrl = URL.createObjectURL(fileBlob);
+
+    downloadBtn.onclick = () => {
+        const a = document.createElement('a');
+        a.href = activeViewerBlobUrl;
+        a.download = file.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
+    const mime = file.type ? file.type.toLowerCase() : "";
+    const extension = file.name.split('.').pop().toLowerCase();
+
+    if (mime.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.src = activeViewerBlobUrl;
+        img.className = 'viewer-img';
+        viewerBody.appendChild(img);
+    } else if (mime === 'application/pdf') {
+        const iframe = document.createElement('iframe');
+        iframe.src = activeViewerBlobUrl;
+        iframe.className = 'viewer-pdf';
+        viewerBody.appendChild(iframe);
+    } else if (mime.startsWith('text/') || ['txt', 'log', 'json', 'csv', 'ini', 'conf', 'xml', 'yaml', 'yml', 'md'].includes(extension)) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const pre = document.createElement('pre');
+            pre.className = 'viewer-text';
+            pre.textContent = e.target.result;
+            viewerBody.appendChild(pre);
+        };
+        reader.readAsText(fileBlob);
+    } else {
+        const div = document.createElement('div');
+        div.className = 'viewer-unsupported';
+        const p1 = document.createElement('p');
+        const strong = document.createElement('strong');
+        strong.textContent = '⚠️ このファイル形式は直接プレビューできません。';
+        p1.appendChild(strong);
+        const p2 = document.createElement('p');
+        p2.style.cssText = 'font-size:0.8rem; color:#888;';
+        p2.textContent = '形式: ' + (file.type || '不明');
+        const p3 = document.createElement('p');
+        p3.style.cssText = 'font-size:0.85rem; margin-top:15px;';
+        p3.textContent = '内容を確認する場合はダウンロードして開いてください。';
+        div.append(p1, p2, p3);
+        viewerBody.appendChild(div);
+    }
+    viewerModal.style.display = 'flex';
+}
+
+function handleCloseViewer() {
+    const viewerModal = document.getElementById('viewerModal');
+    const viewerBody = document.getElementById('viewerBody');
+    if (activeViewerBlobUrl) {
+        URL.revokeObjectURL(activeViewerBlobUrl);
+        activeViewerBlobUrl = null;
+    }
+    if (viewerBody) viewerBody.innerHTML = "";
+    if (viewerModal) viewerModal.style.display = 'none';
+}
+
+async function handleOpenMemo() {
+    const pswd = document.getElementById('pass').value;
+    if (!pswd || pswd === "⏳ 計算中...") return;
+
+    isMemoModalOpen = true;
+    const modal = document.getElementById('memoModal');
+    const memoArea = document.getElementById('memoArea');
+    const historyNameInput = document.getElementById('historyName');
+    
+    memoArea.value = "";
+    historyNameInput.value = "";
+    clearAttachedFiles();
+
+    document.getElementById('memoModalContent').classList.remove('expanded');
+    document.getElementById('btnToggleExpand').textContent = '⛶ 拡大';
+
+    const exactKey = await getStorageKey();
+    const encryptedData = await getDBItem(exactKey);
+    const historyList = getHistoryList();
+    
+    if (historyList[exactKey]) historyNameInput.value = historyList[exactKey];
+    
+    if (encryptedData) {
+        const decryptedText = await decryptText(encryptedData, pswd);
+        if (decryptedText !== "") {
+            try {
+                const payload = JSON.parse(decryptedText);
+                memoArea.value = payload.text || "";
+                if (payload.files && Array.isArray(payload.files)) {
+                    attachedFilesList = payload.files.map(f => ({
+                        name: f.name,
+                        type: f.type,
+                        buffer: base64ToArrayBuffer(f.data)
+                    }));
+                }
+                renderFilesList();
+            } catch (jsonErr) {
+                memoArea.value = decryptedText;
+            }
+        } else {
+            showUIError("保存されたデータの復号に失敗しました。");
+        }
+    }
+    modal.style.display = 'flex';
+    historyNameInput.focus();
+}
+
+function processPostMemoCloseRoutine() {
+    isMemoModalOpen = false;
+    handleCloseViewer();
+
+    const b1 = document.getElementById('bun1').value;
+    const b2 = document.getElementById('bun2').value;
+    if (!b1 || !b2 || passwordGeneratedTimestamp === 0) return;
+
+    const elapsed = Date.now() - passwordGeneratedTimestamp;
+    const remainingTime = CONFIG.AUTO_CLEAR_TIMEOUT - elapsed;
+
+    if (remainingTime <= 0) {
+        executeClearRoutine();
+        showUIInfo("⏳ メモ画面の終了に伴い、保留されていたパスワードを自動消去しました。");
+    } else {
+        startAutoClearTimer(remainingTime);
+    }
+}
+
+function handleCloseMemo() {
+    document.getElementById('memoModal').style.display = 'none';
+    document.getElementById('importFile').value = "";
+    clearAttachedFiles();
+    processPostMemoCloseRoutine();
+}
+
+async function handleSaveMemo() {
+    const pswd = document.getElementById('pass').value;
+    const memoText = document.getElementById('memoArea').value;
+    const historyName = document.getElementById('historyName').value.trim();
+    if (!pswd || pswd === "⏳ 計算中...") return;
+
+    const storageKey = await getStorageKey();
+    const historyList = getHistoryList();
+
+    if (memoText.trim() === "") {
+        if (confirm("メモ本文が空欄です。保存されているメモデータ（添付ファイル含む）は完全に削除されますが、よろしいですか？")) {
+            await deleteDBItem(storageKey);
+            delete historyList[storageKey];
+            saveHistoryList(historyList);
+            alert("データを完全に削除しました。");
+            handleCloseMemo();
+        }
+    } else {
+        const MAX_TOTAL_ATTACH_SIZE = 30 * 1024 * 1024;
+        const totalSize = attachedFilesList.reduce((sum, f) => sum + f.buffer.byteLength, 0);
+        if (totalSize > MAX_TOTAL_ATTACH_SIZE) {
+            alert(`添付ファイルの合計サイズが${Math.round(MAX_TOTAL_ATTACH_SIZE / 1024 / 1024)}MBを超えています。ファイル数を減らしてください。`);
+            return;
+        }
+
+        const saveBtn = document.getElementById('btnSaveMemo');
+        saveBtn.disabled = true;
+        saveBtn.textContent = '暗号化中...';
+        try {
+            const serializableFiles = await Promise.all(attachedFilesList.map(async f => ({
+                name: f.name,
+                type: f.type,
+                data: await arrayBufferToBase64Safe(f.buffer)
+            })));
+            const payload = { text: memoText, files: serializableFiles };
+            const encryptedData = await encryptText(JSON.stringify(payload), pswd);
+            await setDBItem(storageKey, encryptedData);
+            
+            if (historyName) historyList[storageKey] = historyName;
+            else delete historyList[storageKey];
+            saveHistoryList(historyList);
+            alert("メモとファイルを一括暗号化し、ローカルに安全に保存しました。");
+            handleCloseMemo();
+        } catch (e) {
+            console.error(e);
+            alert("暗号化保存に失敗しました。");
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.textContent = '保存';
+        }
+    }
+}
+
+async function handleExportMemo() {
+    const pswd = document.getElementById('pass').value;
+    const memoText = document.getElementById('memoArea').value;
+    if (!pswd || pswd === "⏳ 計算中...") return;
+    if (memoText.trim() === "") {
+        alert("エクスポートするデータがありません。");
+        return;
+    }
+    try {
+        const serializableFiles = await Promise.all(attachedFilesList.map(async f => ({
+            name: f.name,
+            type: f.type,
+            data: await arrayBufferToBase64Safe(f.buffer)
+        })));
+        const payload = { text: memoText, files: serializableFiles };
+        const encryptedData = await encryptText(JSON.stringify(payload), pswd);
+        const blob = new Blob([encryptedData], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        const timestamp = new Date().toISOString().replace(/[:.]/g, "-").substring(0, 19);
+        a.download = `encrypted_memo_v7_${timestamp}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error(e);
+        alert("エクスポートに失敗しました。");
+    }
+}
+
+function handleImportMemo(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const MAX_IMPORT_FILE_SIZE = 50 * 1024 * 1024;
+    if (file.size > MAX_IMPORT_FILE_SIZE) {
+        alert("インポートファイルが大きすぎます（上限: 50MB）。");
+        event.target.value = "";
+        return;
+    }
+
+    const pswd = document.getElementById('pass').value;
+    const memoArea = document.getElementById('memoArea');
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        const encryptedContent = e.target.result.trim();
+        if (!encryptedContent) {
+            alert("ファイルが空です。");
+            event.target.value = "";
+            return;
+        }
+        const decryptedText = await decryptText(encryptedContent, pswd);
+        if (decryptedText === "") {
+            alert("復号に失敗しました。設定（文・キー）が正しいかご確認ください。");
+        } else {
+            try {
+                const payload = JSON.parse(decryptedText);
+                if (typeof payload !== 'object' || payload === null) throw new Error("Invalid payload structure");
+                memoArea.value = (typeof payload.text === 'string') ? payload.text : "";
+                if (payload.files && Array.isArray(payload.files)) {
+                    const validatedFiles = [];
+                    for (const f of payload.files) {
+                        if (!f || typeof f.name !== 'string' || typeof f.data !== 'string') {
+                            console.warn("不正なファイルエントリをスキップしました");
+                            continue;
+                        }
+                        try {
+                            const buffer = base64ToArrayBuffer(f.data);
+                            if (buffer.byteLength > CONFIG.MAX_FILE_SIZE) {
+                                console.warn("サイズ超過のファイルをスキップしました:", f.name);
+                                continue;
+                            }
+                            validatedFiles.push({
+                                name: f.name,
+                                type: (typeof f.type === 'string') ? f.type : "application/octet-stream",
+                                buffer: buffer
+                            });
+                        } catch (decodeErr) {
+                            console.warn("Base64デコードに失敗したファイルをスキップしました:", f.name);
+                        }
+                    }
+                    const MAX_TOTAL_ATTACH_SIZE = 30 * 1024 * 1024;
+                    const totalImportSize = validatedFiles.reduce((sum, f) => sum + f.buffer.byteLength, 0);
+                    if (totalImportSize > MAX_TOTAL_ATTACH_SIZE) {
+                        alert(`添付ファイルの合計サイズが${Math.round(MAX_TOTAL_ATTACH_SIZE / 1024 / 1024)}MBを超えているため、添付ファイルは除外されました。メモ本文のみ読み込みます。`);
+                        clearAttachedFiles();
+                    } else {
+                        attachedFilesList = validatedFiles;
+                    }
+                } else {
+                    clearAttachedFiles();
+                }
+                renderFilesList();
+            } catch(jsonErr) {
+                memoArea.value = decryptedText;
+                clearAttachedFiles();
+            }
+            alert("暗号化ファイルを正常に読み込み、復号しました。（※「保存」ボタンを押すまで確定されません）");
+        }
+        event.target.value = "";
+    };
+    reader.readAsText(file);
+}
+
+async function handleAppBackup() {
+    const backupBtn = document.getElementById('btnAppBackup');
+    try {
+        const backupPassword = prompt("【重要】バックアップファイル自体をロックするための\n「任意のバックアップパスワード」を設定・入力してください：");
+        if (backupPassword === null) return; 
+        if (backupPassword.trim() === "") {
+            alert("エラー: 空白のパスワードではバックアップを作成できません。安全のためパスワードを設定してください。");
+            return;
+        }
+
+        const confirmPassword = prompt("【確認】間違いを防ぐため、もう一度同じパスワードを入力してください：");
+        if (confirmPassword === null) return;
+        if (backupPassword !== confirmPassword) {
+            alert("エラー: 入力されたパスワードが一致しません。バックアップを中断します。");
+            return;
+        }
+
+        backupBtn.disabled = true;
+        backupBtn.textContent = '🔄 暗号化中...';
+
+        const indexedData = await getAllDBItems();
+
+        const estimatedSize = Object.values(indexedData).reduce((sum, val) => sum + (typeof val === 'string' ? val.length : 0), 0);
+        const MAX_BACKUP_SIZE = 1024 * 1024 * 1024;
+        if (estimatedSize > MAX_BACKUP_SIZE) {
+            if (!confirm(`⚠️ データ量が非常に大きいです（約${Math.round(estimatedSize / 1024 / 1024)}MB）。\nバックアップ処理中にブラウザが応答しなくなる可能性があります。\n続行しますか？`)) {
+                backupBtn.disabled = false;
+                backupBtn.textContent = '🗂️ 全データ書き出し (Backup)';
+                return;
+            }
+        }
+        const historyList = localStorage.getItem(CONFIG.HISTORY_STORAGE_KEY) || "{}";
+        const accessKeyRaw = localStorage.getItem(CONFIG.ACCESS_KEY_STORAGE_KEY) || "";
+        const pwLengthSetting = localStorage.getItem(CONFIG.PW_LENGTH_STORAGE_KEY) || "32";
+
+        const rawPackage = {
+            version: "7.3",
+            timestamp: new Date().toISOString(),
+            localStorage: {
+                historyList: JSON.parse(historyList),
+                accessKeyRaw: accessKeyRaw,
+                pwLengthSetting: pwLengthSetting
+            },
+            indexedDB: indexedData
+        };
+
+        const jsonString = JSON.stringify(rawPackage);
+        const encryptedPackageText = await encryptText(jsonString, backupPassword);
+
+        const finalExportData = {
+            appId: "PasswordGeneratorProBackup",
+            cryptoType: "AES-GCM-PBKDF2",
+            payload: encryptedPackageText
+        };
+
+        const blob = new Blob([JSON.stringify(finalExportData, null, 2)], { type: "application/json;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const timestampStr = new Date().toISOString().replace(/[:.]/g, "-").substring(0, 19);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `pw_gen_pro_secure_backup_${timestampStr}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        alert("🎉 設定されたパスワードで全体を暗号化した、安全なバックアップファイルを書き出しました。\nリストア時にはこのパスワードが必要になります。");
+    } catch (err) {
+        console.error("一括バックアップエラー:", err);
+        alert("一括バックアップの作成に失敗しました。");
+    } finally {
+        backupBtn.disabled = false;
+        backupBtn.textContent = '🗂️ 全データ書き出し (Backup)';
+    }
+}
+
+function handleAppRestore(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const MAX_RESTORE_FILE_SIZE = 1024 * 1024 * 1024;
+    if (file.size > MAX_RESTORE_FILE_SIZE) {
+        alert("バックアップファイルが大きすぎます（上限: 1GB）。ファイルを確認してください。");
+        event.target.value = "";
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            const rawFileData = JSON.parse(e.target.result);
+            
+            if (!rawFileData || rawFileData.appId !== "PasswordGeneratorProBackup" || !rawFileData.payload) {
+                alert("エラー: 選択されたファイルは、有効な暗号化バックアップデータではないか、旧バージョンのデータの可能性があります。");
+                event.target.value = "";
+                return;
+            }
+
+            const restorePassword = prompt("このバックアップファイルの「バックアップパスワード」を入力してください：");
+            if (restorePassword === null) {
+                event.target.value = "";
+                return; 
+            }
+
+            const decryptedJsonText = await decryptText(rawFileData.payload, restorePassword);
+            if (!decryptedJsonText) {
+                alert("❌ 復号に失敗しました。\n入力されたバックアップパスワードが間違っているか、ファイルが破損しています。");
+                event.target.value = "";
+                return;
+            }
+
+            const packageData = JSON.parse(decryptedJsonText);
+
+            if (!packageData.localStorage || !packageData.indexedDB) {
+                alert("エラー: バックアップデータ内部の構造が不正です。");
+                event.target.value = "";
+                return;
+            }
+
+            if (!confirm("⚠️確認：正しいパスワードで認証されました。\n\n今からインポートを行うと、現在ブラウザに保存されている全てのメモ履歴、添付ファイル、アクセスキー設定が上書き消去されますが、本当に復元を実行してもよろしいですか？")) {
+                event.target.value = "";
+                return;
+            }
+
+            localStorage.removeItem(CONFIG.HISTORY_STORAGE_KEY);
+            localStorage.removeItem(CONFIG.ACCESS_KEY_STORAGE_KEY);
+            localStorage.removeItem(CONFIG.PW_LENGTH_STORAGE_KEY);
+            await clearAllDBItems();
+
+            if (packageData.localStorage.historyList) {
+                if (typeof packageData.localStorage.historyList === 'object' && !Array.isArray(packageData.localStorage.historyList)) {
+                    const sanitizedHistory = {};
+                    for (const [hKey, hVal] of Object.entries(packageData.localStorage.historyList)) {
+                        if (typeof hKey === 'string' && typeof hVal === 'string') {
+                            sanitizedHistory[hKey] = hVal;
+                        }
+                    }
+                    localStorage.setItem(CONFIG.HISTORY_STORAGE_KEY, JSON.stringify(sanitizedHistory));
+                } else {
+                    console.warn("履歴データの形式が不正なためスキップしました。");
+                }
+            }
+            if (packageData.localStorage.accessKeyRaw !== undefined && packageData.localStorage.accessKeyRaw !== "") {
+                localStorage.setItem(CONFIG.ACCESS_KEY_STORAGE_KEY, "1");
+                document.getElementById('accessKeyBox').style.display = 'flex';
+            } else {
+                localStorage.removeItem(CONFIG.ACCESS_KEY_STORAGE_KEY);
+                document.getElementById('accessKeyBox').style.display = 'none';
+            }
+            if (packageData.localStorage.pwLengthSetting !== undefined) {
+                localStorage.setItem(CONFIG.PW_LENGTH_STORAGE_KEY, packageData.localStorage.pwLengthSetting);
+                document.getElementById('pwLength').value = packageData.localStorage.pwLengthSetting;
+                document.getElementById('pwLengthVal').textContent = packageData.localStorage.pwLengthSetting;
+            } else {
+                localStorage.removeItem(CONFIG.PW_LENGTH_STORAGE_KEY);
+            }
+            currentRawAccessKey = "";
+
+            if (typeof packageData.indexedDB === 'object' && !Array.isArray(packageData.indexedDB)) {
+                let skippedCount = 0;
+                for (const [key, val] of Object.entries(packageData.indexedDB)) {
+                    if (typeof key !== 'string' || typeof val !== 'string') {
+                        skippedCount++;
+                        continue;
+                    }
+                    if (!key.startsWith("pw_memo_v")) {
+                        skippedCount++;
+                        continue;
+                    }
+                    await setDBItem(key, val);
+                }
+                if (skippedCount > 0) {
+                    console.warn(`${skippedCount}件の不正なDBエントリをスキップしました。`);
+                }
+            } else {
+                console.warn("IndexedDBデータの形式が不正なためスキップしました。");
+            }
+
+            renderHistoryList();
+            handleInputDebounced(); // 【修正】更新を反映
+            alert("🎉 パスワード認証に成功し、全データの復元（一括リストア）が完了しました！");
+            
+            document.getElementById('helpModal').style.display = 'none';
+
+        } catch (err) {
+            console.error("リストア処理エラー:", err);
+            alert("エラー: ファイルの解析またはデータベースの書き込み中に致命的なエラーが発生しました。");
+        }
+        event.target.value = "";
+    };
+    reader.readAsText(file);
+}
+
+function handleOpenHelp() { document.getElementById('helpModal').style.display = 'flex'; }
+function handleCloseHelp() { document.getElementById('helpModal').style.display = 'none'; }
+
+async function handleResetAllData() {
+    if (!confirm("⚠️ 警告：この操作を実行すると、このアプリに保存されている全てのデータ（暗号化メモ、添付ファイル、履歴一覧、アクセスキー設定）が完全に削除されます。\n\nこの操作は取り消せません。本当に続行しますか？")) {
+        return;
+    }
+    if (!confirm("【最終確認】\n\n本当に全てのデータを完全消去してもよろしいですか？\n\nバックアップを取っていない場合、データの復元は一切できません。")) {
+        return;
+    }
+    try {
+        await clearAllDBItems();
+        localStorage.removeItem(CONFIG.HISTORY_STORAGE_KEY);
+        localStorage.removeItem(CONFIG.ACCESS_KEY_STORAGE_KEY);
+        localStorage.removeItem(CONFIG.PW_LENGTH_STORAGE_KEY);
+        currentRawAccessKey = "";
+        document.getElementById('accessKeyInput').value = "";
+        document.getElementById('accessKeyBox').style.display = 'none';
+        await executeClearRoutine();
+        renderHistoryList();
+        handleCloseHelp();
+        alert("✅ 全てのデータを消去しました。アプリは初期状態にリセットされました。");
+    } catch (err) {
+        console.error("データベースリセットエラー:", err);
+        alert("エラー: データの消去中に問題が発生しました。");
+    }
+}
+</script>
+</body>
+</html>
